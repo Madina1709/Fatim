@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pardonner Madina</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@400;700&display=swap">
+<style>
+  /* Layout: one centered stage that swaps between an invitation card and the question; a festive modal on top. Single festive look by choice. */
+  :root {
+    --bg: #2a0f3d;
+    --bg-2: #5a1a5e;
+    --fg: #fff6ec;
+    --muted: #e9cfe6;
+    --gold: #ffc94a;
+    --coral: #ff6b8b;
+    --mint: #4fe0b6;
+    --card: #3a1650;
+    --display: "Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+    --body: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color-scheme: dark;
+  }
+  html, body { height: 100%; }
+  body { margin: 0; }
+  [hidden] { display: none !important; }
+  body {
+    background: radial-gradient(120% 90% at 50% 0%, var(--bg-2) 0%, var(--bg) 60%) fixed, var(--bg);
+    color: var(--fg);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.55;
+    overflow-x: hidden;
+  }
+  #confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
+
+  .stage {
+    min-height: 100%;
+    display: grid;
+    place-items: center;
+    padding-block: 32px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    box-sizing: border-box;
+  }
+  .view { width: 100%; max-width: 520px; display: grid; gap: 22px; justify-items: center; text-align: center; }
+
+  .eyebrow { font-weight: 700; letter-spacing: .14em; text-transform: uppercase; font-size: 13px; color: var(--gold); }
+  h1 {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(2.1rem, 8vw, 3.2rem);
+    line-height: 1.05;
+    margin: 0;
+    text-wrap: balance;
+  }
+  h1 .name { color: var(--gold); display: inline-block; animation: wiggle 2.4s ease-in-out infinite; }
+  p.lead { margin: 0; color: var(--muted); max-width: 36ch; }
+
+  .envelope {
+    font-size: 72px; line-height: 1;
+    animation: float 3s ease-in-out infinite;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,.35));
+  }
+
+  .link-btn {
+    font-family: var(--display); font-weight: 800; font-size: 1.25rem;
+    color: #2a0f3d; background: var(--gold);
+    border: 0; border-radius: 999px; padding: 14px 30px; cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 6px 0 #c9901a, 0 14px 30px rgba(255, 201, 74, .25);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .link-btn:hover { transform: translateY(-2px); }
+  .link-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #c9901a; }
+
+  .choices { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .choice {
+    font-family: var(--display); font-weight: 800; font-size: 1.5rem;
+    min-width: 140px; padding: 14px 28px; border-radius: 18px; border: 0; cursor: pointer;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .choice.yes { background: var(--mint); color: #0d3a2e; box-shadow: 0 6px 0 #22a982; }
+  .choice.no  { background: var(--coral); color: #4a0b1c; box-shadow: 0 6px 0 #d1405f; }
+  .choice:hover { transform: translateY(-3px) rotate(-2deg); }
+  .choice:active { transform: translateY(4px); box-shadow: none; }
+  button:focus-visible, a:focus-visible { outline: 3px solid var(--fg); outline-offset: 4px; }
+
+  .hearts { font-size: 28px; letter-spacing: 6px; }
+
+  /* Modal */
+  .overlay {
+    position: fixed; inset: 0; z-index: 20;
+    background: rgba(20, 5, 30, .6);
+    backdrop-filter: blur(4px);
+    display: grid; place-items: center;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .modal {
+    position: relative;
+    width: 100%; max-width: 440px; box-sizing: border-box;
+    background: var(--card);
+    border: 3px solid var(--gold);
+    border-radius: 28px;
+    padding: 36px 24px 28px;
+    text-align: center;
+    display: grid; gap: 14px; justify-items: center;
+    box-shadow: 0 0 0 8px rgba(255, 201, 74, .15), 0 30px 60px rgba(0,0,0,.45);
+    animation: pop .55s cubic-bezier(.2, 1.6, .4, 1) both;
+  }
+  .modal .party { font-size: 56px; line-height: 1; animation: bounce 1s ease-in-out infinite; }
+  .modal h2 {
+    font-family: var(--display); font-weight: 800; margin: 0;
+    font-size: clamp(1.6rem, 6vw, 2.1rem); line-height: 1.15; text-wrap: balance;
+  }
+  .modal h2 .name { color: var(--gold); }
+  .modal .love {
+    font-family: var(--display); font-weight: 800; font-size: 1.6rem;
+    color: var(--coral); margin: 0;
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  .modal .small { margin: 0; color: var(--muted); font-size: 15px; }
+  .again {
+    margin-top: 6px; background: transparent; color: var(--fg);
+    border: 2px solid var(--muted); border-radius: 999px; padding: 8px 20px;
+    font-family: var(--body); font-weight: 700; font-size: 15px; cursor: pointer;
+  }
+
+  @keyframes float { 0%,100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-12px) rotate(4deg); } }
+  @keyframes wiggle { 0%,100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+  @keyframes pop { from { transform: scale(.4) rotate(-8deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
+  @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<main class="stage">
+  <!-- Étape 1 : le lien -->
+  <section class="view" id="intro">
+    <div class="envelope" aria-hidden="true">💌</div>
+    <span class="eyebrow">Tu as un message</span>
+    <h1>Quelqu'un a quelque chose d'important à te demander…</h1>
+    <a href="#question" class="link-btn" id="openLink">Ouvrir le message ✨</a>
+  </section>
+
+  <!-- Étape 2 : la question -->
+  <section class="view" id="question" hidden>
+    <div class="hearts" aria-hidden="true">💖 🎈 💖</div>
+    <span class="eyebrow">Une seule question</span>
+    <h1>Veux-tu pardonner <span class="name">Madina</span> ?</h1>
+    <p class="lead">Réfléchis bien… puis choisis.</p>
+    <div class="choices">
+      <button class="choice yes" id="btnYes" type="button">Oui</button>
+      <button class="choice no" id="btnNo" type="button">Non</button>
+    </div>
+  </section>
+</main>
+
+<!-- Boîte festive -->
+<div class="overlay" id="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
+    <div class="party" aria-hidden="true">🎉</div>
+    <h2 id="modalTitle">Merci d'avoir pardonné <span class="name">Madina</span> !</h2>
+    <p class="love">Elle t'aime ❤️</p>
+    <p class="small" id="modalNote">Tu as fait le bon choix 🥳</p>
+    <button class="again" id="btnAgain" type="button">Fêter encore 🎊</button>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var intro = document.getElementById('intro');
+    var question = document.getElementById('question');
+    var overlay = document.getElementById('overlay');
+    var note = document.getElementById('modalNote');
+
+    function show(view) {
+      intro.hidden = view !== 'intro';
+      question.hidden = view !== 'question';
+    }
+    function route() { show(location.hash === '#question' ? 'question' : 'intro'); }
+    window.addEventListener('hashchange', route);
+    route();
+
+    document.getElementById('openLink').addEventListener('click', function (e) {
+      e.preventDefault();
+      if (location.hash !== '#question') location.hash = 'question';
+      show('question');
+      burst(80);
+    });
+
+    function celebrate(said) {
+      note.textContent = said === 'yes'
+        ? 'Tu as fait le bon choix 🥳'
+        : 'Même un « non » compte comme un oui ici 😉';
+      overlay.hidden = false;
+      document.getElementById('btnAgain').focus();
+      burst(220);
+      setTimeout(function () { burst(140); }, 500);
+    }
+    document.getElementById('btnYes').addEventListener('click', function () { celebrate('yes'); });
+    document.getElementById('btnNo').addEventListener('click', function () { celebrate('no'); });
+    document.getElementById('btnAgain').addEventListener('click', function () { burst(220); });
+
+    // Confettis
+    var canvas = document.getElementById('confetti');
+    var ctx = canvas.getContext('2d');
+    var pieces = [];
+    var colors = ['#ffc94a', '#ff6b8b', '#4fe0b6', '#8fb8ff', '#ffffff', '#c58bff'];
+    var running = false;
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function resize() {
+      var dpr = window.devicePixelRatio || 1;
+      canvas.width = innerWidth * dpr;
+      canvas.height = innerHeight * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    function burst(n) {
+      if (reduce) return;
+      for (var i = 0; i < n; i++) {
+        pieces.push({
+          x: innerWidth / 2 + (Math.random() - .5) * innerWidth * .3,
+          y: innerHeight * .45,
+          vx: (Math.random() - .5) * 16,
+          vy: -Math.random() * 16 - 6,
+          w: 6 + Math.random() * 8,
+          h: 8 + Math.random() * 10,
+          r: Math.random() * Math.PI,
+          vr: (Math.random() - .5) * .3,
+          c: colors[(Math.random() * colors.length) | 0],
+          heart: Math.random() < .15,
+          life: 0
+        });
+      }
+      if (!running) { running = true; requestAnimationFrame(tick); }
+    }
+
+    function tick() {
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      for (var i = pieces.length - 1; i >= 0; i--) {
+        var p = pieces[i];
+        p.vy += .35; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr; p.life++;
+        if (p.y > innerHeight + 40 || p.life > 400) { pieces.splice(i, 1); continue; }
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.r);
+        ctx.fillStyle = p.c;
+        if (p.heart) {
+          ctx.font = '18px serif';
+          ctx.fillText('❤', -8, 6);
+        } else {
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        }
+        ctx.restore();
+      }
+      if (pieces.length) requestAnimationFrame(tick);
+      else running = false;
+    }
+  })();
+</script>
+</body>
+</html>
